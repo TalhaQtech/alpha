@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "209516928252",
+    "firebase_url": "https://alfa-e718f-default-rtdb.firebaseio.com",
+    "project_id": "alfa-e718f",
+    "storage_bucket": "alfa-e718f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:209516928252:android:f4c2870d11d3cb88864b79",
+        "android_client_info": {
+          "package_name": "com.alfa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "209516928252-glshkiktsnc3qnjod64e190k9c332di9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnHYeXEyrql7YnX1IvGvN_c8jufWLYk44"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "209516928252-glshkiktsnc3qnjod64e190k9c332di9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
