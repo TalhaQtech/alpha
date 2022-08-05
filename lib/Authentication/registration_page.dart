@@ -123,64 +123,63 @@ class _RegistrationPageState extends State<RegistrationPage> {
                             child: ElevatedButton(
                               child: Text("Register",
                                   style: GoogleFonts.quicksand()),
-                              onPressed: () {
-                                if (fullNameTC.text.isEmpty ||
-                                    emailAddessTC.text.isEmpty ||
-                                    passwordTC.text.isEmpty) {
-                                  showErrorToastBottom(
-                                      "One or more fields are empty");
-                                } else if (passwordTC.text.length < 6) {
-                                  showErrorToastBottom("Password is too short");
-                                } else if (termsAndConditionValue == false) {
-                                  showErrorToastBottom(
-                                      "Accept the terms and conditions before you proceed");
-                                } else {
-                                  // Register new user here
+                              onPressed: () async {
+                                // if (fullNameTC.text.isEmpty ||
+                                //     emailAddessTC.text.isEmpty ||
+                                //     passwordTC.text.isEmpty) {
+                                //   showErrorToastBottom(
+                                //       "One or more fields are empty");
+                                // } else if (passwordTC.text.length < 6) {
+                                //   showErrorToastBottom("Password is too short");
+                                // } else if (termsAndConditionValue == false) {
+                                //   showErrorToastBottom(
+                                //       "Accept the terms and conditions before you proceed");
+                                // } else {
+                                //   // Register new user here
 
-                                  setState(() {
-                                    regBtnLoadingVisible = false;
-                                    loaderVisible = true;
+                                //   setState(() {
+                                //     regBtnLoadingVisible = false;
+                                //     loaderVisible = true;
+                                //   });
+
+                                await FirebaseAuth.instance
+                                    .createUserWithEmailAndPassword(
+                                        email: emailAddessTC.text,
+                                        password: passwordTC.text);
+                                //       .then((value) async {
+                                //     await OneSignal.shared
+                                //         .setAppId(oneSignalAppID);
+                                //     var status =
+                                //         await OneSignal.shared.getDeviceState();
+                                // String? tokenId = status?.userId;
+
+                                //     // Store new user details to database
+                                var uid =
+                                    FirebaseAuth.instance.currentUser!.uid;
+                                print(uid);
+                                await usersDetailsRef.child(uid).set({
+                                  "fullName": fullNameTC.text,
+                                  "tokenId": "tokenId",
+                                  "status": "offline",
+                                  "subscriptionType": "FREE",
+                                  "lastSeenTimeStamp": currentDateForPost + "Z"
+                                }).then((value) {
+                                  // Send verification email
+                                  FirebaseAuth.instance.currentUser!
+                                      .sendEmailVerification()
+                                      .then((value) {
+                                    goToNewPage(LoginPage());
+                                    showNormalToastBottom(
+                                        "Verification Sent to your email at: ${emailAddessTC.text}");
                                   });
 
-                                  FirebaseAuth.instance
-                                      .createUserWithEmailAndPassword(
-                                          email: emailAddessTC.text,
-                                          password: passwordTC.text)
-                                      .then((value) async {
-                                    await OneSignal.shared
-                                        .setAppId(oneSignalAppID);
-                                    var status =
-                                        await OneSignal.shared.getDeviceState();
-                                    String? tokenId = status?.userId;
-
-                                    // Store new user details to database
-                                    usersDetailsRef
-                                        .child(FirebaseAuth
-                                            .instance.currentUser!.uid)
-                                        .set({
-                                      "fullName": fullNameTC.text,
-                                      "tokenId": tokenId,
-                                      "status": "offline",
-                                      "subscriptionType" : "FREE",
-                                      "lastSeenTimeStamp":
-                                          currentDateForPost + "Z"
-                                    }).then((value) {
-                                      // Send verification email
-                                      FirebaseAuth.instance.currentUser!
-                                          .sendEmailVerification()
-                                          .then((value) {
-                                        goToNewPage(LoginPage());
-                                        showNormalToastBottom(
-                                            "Verification Sent to your email at: ${emailAddessTC.text}");
-                                      });
-
-                                      setState(() {
-                                        loaderVisible = false;
-                                        regBtnLoadingVisible = true;
-                                      });
-                                    });
-                                  });
-                                }
+                                  //       setState(() {
+                                  //         loaderVisible = false;
+                                  //         regBtnLoadingVisible = true;
+                                });
+                                //     });
+                                //   });
+                                // }
                               },
                               style: ButtonStyle(
                                   backgroundColor: MaterialStateProperty.all(

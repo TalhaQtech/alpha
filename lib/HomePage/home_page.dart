@@ -1,8 +1,6 @@
 // ignore_for_file: prefer_const_constructors
+// import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-import 'dart:convert';
-import 'dart:ui';
-import 'dart:io';
 import 'package:alfa/Chats/recent_chats.dart';
 import 'package:alfa/HomePage/add_new_product.dart';
 import 'package:alfa/HomePage/posts_details_page.dart';
@@ -18,6 +16,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -147,7 +146,7 @@ class _HomePageState extends State<HomePage>
         ],
       ),
       drawer: Drawer(
-        child: Column(children: [
+        child: ListView(children: [
           DrawerHeader(child: Image.asset("images/logo.png")),
           Divider(
             color: Colors.grey,
@@ -446,9 +445,9 @@ class _HomePageState extends State<HomePage>
     // ignore: prefer_function_declarations_over_variables
     VoidCallback continueCallBack = () async {
       Navigator.of(context).pop();
-      // code on continue comes here
+      EasyLoading.show();
 
-      usersDetailsRef
+      await usersDetailsRef
           .child(FirebaseAuth.instance.currentUser!.uid)
           .child("status")
           .set("offline")
@@ -493,13 +492,10 @@ class _HomePageState extends State<HomePage>
     Navigator.push(context, MaterialPageRoute(builder: (context) => widget));
   }
 
-   void updateUserToken() async {
-
-      await OneSignal.shared.setAppId(oneSignalAppID);
+  void updateUserToken() async {
+    await OneSignal.shared.setAppId(oneSignalAppID);
     var status = await OneSignal.shared.getDeviceState();
     String? tokenId = status?.userId;
-
-
 
     usersDetailsRef
         .child(FirebaseAuth.instance.currentUser!.uid)

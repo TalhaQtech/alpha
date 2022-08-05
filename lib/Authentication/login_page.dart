@@ -5,6 +5,7 @@ import 'package:alfa/Profile/profile_page.dart';
 import 'package:alfa/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -44,141 +45,146 @@ class LoginPageState extends State<LoginPage> {
       ),
       body: Container(
         margin: EdgeInsets.all(12),
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Image.asset("images/logo.png"),
-          topMargin(10),
-          TextFormField(
-            cursorColor: primaryColorGreen,
-            controller: emailAddessTC,
-            decoration: InputDecoration(
-                hintText: "Email Address",
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                focusedBorder: OutlineInputBorder(
+        child: SingleChildScrollView(
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Image.asset("images/logo.png"),
+            topMargin(10),
+            TextFormField(
+              cursorColor: primaryColorGreen,
+              controller: emailAddessTC,
+              decoration: InputDecoration(
+                  hintText: "Email Address",
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: primaryColorGreen))),
+            ),
+            topMargin(10),
+            TextFormField(
+              cursorColor: primaryColorGreen,
+              controller: passwordTC,
+              obscureText: true,
+              decoration: InputDecoration(
+                  hintText: "Password",
+                  border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: primaryColorGreen))),
-          ),
-          topMargin(10),
-          TextFormField(
-            cursorColor: primaryColorGreen,
-            controller: passwordTC,
-            obscureText: true,
-            decoration: InputDecoration(
-                hintText: "Password",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: primaryColorGreen))),
+            ),
+            topMargin(10),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: TextButton(
+                onPressed: () {
+                  if (emailAddessTC.text.isEmpty) {
+                    showErrorToastBottom(
+                        "Enter your email address to continue");
+                  } else {
+                    showBlurryDialog(context);
+                  }
+                },
+                child: Text(
+                  "Forgot Password?",
+                  style: TextStyle(color: Colors.grey),
                 ),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: primaryColorGreen))),
-          ),
-          topMargin(10),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: TextButton(
-              onPressed: () {
-                if (emailAddessTC.text.isEmpty) {
-                  showErrorToastBottom("Enter your email address to continue");
-                } else {
-                  showBlurryDialog(context);
-                }
-              },
-              child: Text(
-                "Forgot Password?",
-                style: TextStyle(color: Colors.grey),
               ),
             ),
-          ),
-          topMargin(10),
-          Stack(
-            children: [
-              Visibility(
-                  visible: loaderVisibility,
-                  child: SizedBox(
-                    width: 50,
-                    height: 50,
-                    child: CircularProgressIndicator(
-                      color: primaryColorGreen,
-                    ),
-                  )),
-              Visibility(
-                  visible: loginBtnVisibility,
-                  child: Container(
-                      height: 45,
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        child: Text("Login", style: GoogleFonts.quicksand()),
-                        onPressed: () {
-                          if (emailAddessTC.text.isEmpty ||
-                              passwordTC.text.isEmpty) {
-                            showErrorToastBottom(
-                                "One or more fields are empty");
-                          } else if (passwordTC.text.length < 6) {
-                            showErrorToastBottom("Password is too short");
-                          } else {
-                            setState(() {
-                              loginBtnVisibility = false;
-                              loaderVisibility = true;
-                            });
-
-                            // Register new user here
-
-                            FirebaseAuth.instance
-                                .signInWithEmailAndPassword(
-                                    email: emailAddessTC.text,
-                                    password: passwordTC.text)
-                                .catchError((error) {
-                              showNormalToastBottom(error.toString());
-
+            topMargin(10),
+            Stack(
+              children: [
+                Visibility(
+                    visible: loaderVisibility,
+                    child: SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: CircularProgressIndicator(
+                        color: primaryColorGreen,
+                      ),
+                    )),
+                Visibility(
+                    visible: loginBtnVisibility,
+                    child: Container(
+                        height: 45,
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          child: Text("Login", style: GoogleFonts.quicksand()),
+                          onPressed: () async {
+                            if (emailAddessTC.text.isEmpty ||
+                                passwordTC.text.isEmpty) {
+                              showErrorToastBottom(
+                                  "One or more fields are empty");
+                            } else if (passwordTC.text.length < 6) {
+                              showErrorToastBottom("Password is too short");
+                            } else {
                               setState(() {
-                                loginBtnVisibility = true;
-                                loaderVisibility = false;
+                                loginBtnVisibility = false;
+                                loaderVisibility = true;
                               });
-                            }).then((value) {
-                              try {
-                                if (FirebaseAuth
-                                    .instance.currentUser!.emailVerified) {
-                                  // Go to Home Page
 
-                                  goToNewPage(HomePage());
-                                  showNormalToastBottom(
-                                      "Successfully Loged In");
+                              // Register new user here
+                              EasyLoading.show();
+                              await FirebaseAuth.instance
+                                  .signInWithEmailAndPassword(
+                                      email: emailAddessTC.text.trim(),
+                                      password: passwordTC.text.trim())
+                                  .catchError((error) {
+                                showNormalToastBottom(error.toString());
 
-                                  setState(() {
-                                    loginBtnVisibility = true;
-                                    loaderVisibility = false;
-                                  });
-                                } else {
-                                  /// TEMPORARY >>> REMOVE!!!
-                                  //  goToNewPage(HomePage());
-                                  setState(() {
-                                    loginBtnVisibility = true;
-                                    loaderVisibility = false;
-                                  });
+                                setState(() {
+                                  loginBtnVisibility = true;
+                                  loaderVisibility = false;
+                                });
+                              }).then((value) async {
+                                try {
+                                  if (FirebaseAuth
+                                      .instance.currentUser!.emailVerified) {
+                                    // Go to Home Page
 
-                                  showNormalToastBottom(
-                                      "Your email is not verified. Check your mail box to verify");
+                                    await goToNewPage(HomePage());
+                                    showNormalToastBottom(
+                                        "Successfully Loged In");
+                                    EasyLoading.dismiss();
+
+                                    setState(() {
+                                      loginBtnVisibility = true;
+                                      loaderVisibility = false;
+                                    });
+                                  } else {
+                                    /// TEMPORARY >>> REMOVE!!!
+                                    //  goToNewPage(HomePage());
+                                    setState(() {
+                                      loginBtnVisibility = true;
+                                      loaderVisibility = false;
+                                    });
+
+                                    showNormalToastBottom(
+                                        "Your email is not verified. Check your mail box to verify");
+                                  }
+                                } catch (error) {
+                                  if (error.toString() ==
+                                      'ERROR_WRONG_PASSWORD') {
+                                    showErrorToastBottom(
+                                        "Incorrect email and password combinations");
+                                  }
                                 }
-                              } catch (error) {
-                                if (error.toString() ==
-                                    'ERROR_WRONG_PASSWORD') {
-                                  showErrorToastBottom(
-                                      "Incorrect email and password combinations");
-                                }
-                              }
-                            });
-                          }
-                        },
-                        style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all(primaryColorGreen),
-                            shape: MaterialStateProperty.all(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)))),
-                      ))),
-            ],
-          )
-        ]),
+                              });
+                            }
+                          },
+                          style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(primaryColorGreen),
+                              shape: MaterialStateProperty.all(
+                                  RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(12)))),
+                        ))),
+              ],
+            )
+          ]),
+        ),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -101,7 +102,7 @@ class _AddNewProductState extends State<AddNewProduct> {
       ),
       body: Container(
         margin: EdgeInsets.all(12),
-        child: ListView(children: [
+        child: ListView(shrinkWrap: true, children: [
           TextFormField(
             controller: itemNameTC,
             decoration: InputDecoration(
@@ -194,67 +195,58 @@ class _AddNewProductState extends State<AddNewProduct> {
                               color: primaryColorGreen,
                             ))),
                   )),
-              Visibility(
-                  visible: addNewProductBtn,
-                  child: Container(
-                      height: 45,
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        child: Text("Publish Item Now",
-                            style: GoogleFonts.quicksand()),
-                        onPressed: () {
-                          if (itemNameTC.text.isEmpty ||
-                              itemDescTC.text.isEmpty ||
-                              priceTC.text.isEmpty ||
-                              locationTC.text.isEmpty) {
-                            showErrorToastBottom(
-                                "One or more fields are emptyu");
-                          } else if (categoryValue == "Select Category") {
-                            showErrorToastBottom("Please select item category");
-                          } else if (itemImageUrl == "") {
-                            showErrorToastBottom(
-                                "Please select item image/video");
-                          } else {
-                            setState(() {
-                              addNewProductBtn = false;
-                              loaderVisibility = true;
-                            });
+              ElevatedButton(
+                child: Text("Publish Item Now", style: GoogleFonts.quicksand()),
+                onPressed: () async {
+                  if (itemNameTC.text.isEmpty ||
+                      itemDescTC.text.isEmpty ||
+                      priceTC.text.isEmpty ||
+                      locationTC.text.isEmpty) {
+                    showErrorToastBottom("One or more fields are emptyu");
+                  } else if (categoryValue == "Select Category") {
+                    showErrorToastBottom("Please select item category");
+                  } else if (itemImageUrl == "") {
+                    showErrorToastBottom("Please select item image/video");
+                  } else {
+                    // setState(() {
+                    //   addNewProductBtn = false;
+                    //   loaderVisibility = true;
+                    // });
 
-                            DatabaseReference postsRef =
-                                FirebaseDatabase().reference().child("Posts");
+                    DatabaseReference postsRef =
+                        FirebaseDatabase().reference().child("Posts");
 
-                            String postId = postsRef.push().key;
+                    String postId = postsRef.push().key;
 
-                            postsRef.child(postId).set({
-                              "postId": postId,
-                              "itemName": itemNameTC.text,
-                              "itemDesc": itemDescTC.text,
-                              "itemImage": itemImageUrl,
-                              "price": priceTC.text,
-                              "location": locationTC.text,
-                              "category": categoryValue,
-                              "sellerId":
-                                  FirebaseAuth.instance.currentUser!.uid,
-                              "sellerName": fullNameFromFirebase,
-                              "sellerImage": userAvatarUrl,
-                              "sellerContactNo": mobileNumberFromFirebase,
-                              "dislikesCount": 0
-                            }).then((value) {
-                              showNormalToastBottom("Successful");
-                              setState(() {
-                                addNewProductBtn = true;
-                                loaderVisibility = false;
-                              });
-                            });
-                          }
-                        },
-                        style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all(primaryColorGreen),
-                            shape: MaterialStateProperty.all(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)))),
-                      ))),
+                    await postsRef.child(postId).set({
+                      "postId": postId,
+                      "itemName": itemNameTC.text,
+                      "itemDesc": itemDescTC.text,
+                      "itemImage": itemImageUrl,
+                      "price": priceTC.text,
+                      "location": locationTC.text,
+                      "category": categoryValue,
+                      "sellerId": FirebaseAuth.instance.currentUser!.uid,
+                      "sellerName": fullNameFromFirebase,
+                      "sellerImage": userAvatarUrl,
+                      "sellerContactNo": mobileNumberFromFirebase,
+                      "dislikesCount": 0
+                    }).then((value) {
+                      showNormalToastBottom("Successful");
+                      Get.back();
+                      setState(() {
+                        addNewProductBtn = true;
+                        loaderVisibility = false;
+                      });
+                    });
+                  }
+                },
+                style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(primaryColorGreen),
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)))),
+              ),
             ],
           )
         ]),
@@ -276,15 +268,11 @@ class _AddNewProductState extends State<AddNewProduct> {
       Navigator.of(context).pop();
       // code on continue comes here
 
-    
       //   performFirebaseStorageLogicForVideoPost();
     };
 
-    PostsBlurryDialog alert = PostsBlurryDialog(
-        "Graphic Upload",
-        "Please select your image cover",
-        imageCallBack,
-        videoCallBack);
+    PostsBlurryDialog alert = PostsBlurryDialog("Graphic Upload",
+        "Please select your image cover", imageCallBack, videoCallBack);
 
     showDialog(
       context: context,
